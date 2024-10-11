@@ -24,6 +24,31 @@ module.exports = {
 				},
 				accent: 'rgb(var(--accent) / 1)',
 			},
+			keyframes: {
+				'waveform-quiet': {
+					'25%': { transform: 'scaleY(.6)' },
+					'50%': { transform: 'scaleY(.4)' },
+					'75%': { transform: 'scaleY(.8)' },
+				},
+				'waveform-normal': {
+					'25%': { transform: 'scaleY(1)' },
+					'50%': { transform: 'scaleY(.4)' },
+					'75%': { transform: 'scaleY(.6)' },
+				},
+				'waveform-loud': {
+					'25%': { transform: 'scaleY(1)' },
+					'50%': { transform: 'scaleY(.4)' },
+					'75%': { transform: 'scaleY(1.2)' },
+				},
+				'waveform-base': {
+					'0%, 100%': { transform: 'scaleY(.4)' },
+				},
+			},
+			animation: {
+				'waveform-quiet': 'waveform-quiet 1.2s ease-in-out infinite',
+				'waveform-normal': 'waveform-normal 1.2s ease-in-out infinite',
+				'waveform-loud': 'waveform-loud 1.2s ease-in-out infinite',
+			},
 		},
 	},
 }

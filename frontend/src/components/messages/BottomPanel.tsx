@@ -1,5 +1,5 @@
 import { RoomRes, User } from '@/types'
-import { Message as TMessage } from '@/types/broadcast'
+import { Message as TMessage } from '@/types'
 import { EmojiPicker } from '../EmojiPicker'
 import { EmojiSearch } from './EmojiSearch'
 import { MentionParticipants } from './MentionParticipants'

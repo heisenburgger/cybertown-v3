@@ -1,7 +1,7 @@
 import { cn, scrollToMessage } from '@/lib/utils'
 import { User } from '@/types'
 import { CircleX as CloseIcon } from 'lucide-react'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 
 type Props = {
 	replyTo: string | undefined

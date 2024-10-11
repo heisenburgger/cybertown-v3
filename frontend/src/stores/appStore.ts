@@ -8,12 +8,14 @@ import {
 	ErrorBroadcastEvent,
 	JoinedRoomBroadcastEvent,
 	KickParticipantBroadcastEvent,
-	Message,
 	NewMsgBroadcastEvent,
+	PeerMuteBroadcastEvent,
 	ReactionToMsgBroadcastEvent,
-} from '@/types/broadcast'
+} from '@/types/server-event'
+import { Message } from '@/types'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
+import { RoomStream } from '@/types/peer'
 
 type State = {
 	isKicked: {
@@ -45,6 +47,7 @@ type State = {
 		/* messages container scroll position */ percent: number
 		hasScrolledDown: boolean
 	}
+	roomStreams: Record<string, RoomStream>
 
 	popups: {
 		login: boolean
@@ -78,6 +81,8 @@ type Actions = {
 	setJoinedAnotherRoom: (isJoined: boolean) => void
 	setRoomTab: (tab: string) => void
 	setUnreadCount: (count: number) => void
+	addToRoomStreams: (streams: Record<string, RoomStream>) => void
+	setSpeaking: (streamID: string, speaking: boolean) => void
 
 	// scroll
 	setScrollPercent: (percent: number) => void
@@ -98,6 +103,7 @@ type Actions = {
 	clearChat: (event: ClearChatBroadcastEvent) => void
 	kickParticipant: (event: KickParticipantBroadcastEvent) => void
 	error: (event: ErrorBroadcastEvent) => void
+	setMute: (event: PeerMuteBroadcastEvent) => void
 }
 
 export const useAppStore = create<State & Actions>()(
@@ -120,6 +126,7 @@ export const useAppStore = create<State & Actions>()(
 			percent: 0,
 			hasScrolledDown: false,
 		},
+		roomStreams: {},
 
 		popups: {
 			login: false,
@@ -207,6 +214,11 @@ export const useAppStore = create<State & Actions>()(
 				if (event.data.user.id === state.user?.id) {
 					state.sid = event.data.sid
 				}
+			}),
+
+		addToRoomStreams: (streams) =>
+			set((state) => {
+				state.roomStreams = { ...state.roomStreams, ...streams }
 			}),
 
 		addMsg: (event) =>
@@ -366,6 +378,31 @@ export const useAppStore = create<State & Actions>()(
 			set((state) => {
 				state.dm[participantID] = []
 				state.selectedDM = null
+			}),
+
+		setSpeaking: (streamID, speaking) =>
+			set((state) => {
+				const stream = Object.entries(state.roomStreams).find(
+					([_, value]) => value.streamID === streamID
+				)
+				if (stream) {
+					const [pID] = stream
+					if (!state.roomStreams[pID]) {
+						return
+					}
+					state.roomStreams[pID].speaking = speaking
+					if (speaking) {
+						state.roomStreams[pID].mute = false
+					}
+				}
+			}),
+
+		setMute: (event) =>
+			set((state) => {
+				const { mute, participantID: pID } = event.data
+				if (state.roomStreams[pID]) {
+					state.roomStreams[pID].mute = mute
+				}
 			}),
 
 		error: (event) =>

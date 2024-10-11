@@ -2,7 +2,7 @@ import { cn, getParticipantID } from '@/lib/utils'
 import { ws } from '@/lib/ws'
 import { useAppStore } from '@/stores/appStore'
 import { User } from '@/types'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 import * as HoverCard from '@radix-ui/react-hover-card'
 
 type Props = {

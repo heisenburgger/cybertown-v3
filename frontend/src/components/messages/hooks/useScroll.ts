@@ -1,5 +1,5 @@
 import { useAppStore } from '@/stores/appStore'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 import { RefObject, useEffect } from 'react'
 import { useScrollPercentage } from './useScrollPercentage'
 import { User } from '@/types'

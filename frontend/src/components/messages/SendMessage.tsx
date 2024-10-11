@@ -5,7 +5,7 @@ import { getParticipantID } from '@/lib/utils'
 import { ws } from '@/lib/ws'
 import { useAppStore } from '@/stores/appStore'
 import { Emoji } from './hooks/useEmojiSearch'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 
 type Props = {
 	content: string

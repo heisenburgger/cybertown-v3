@@ -3,13 +3,14 @@ import { twMerge } from 'tailwind-merge'
 import { QueryClient } from 'react-query'
 import { config } from '@/config'
 import { ZodError } from 'zod'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 import { User } from '@/types'
 import DOMPurify from 'dompurify'
 import { marked } from 'marked'
 import { renderer } from './md-renderer'
 import { useAppStore } from '@/stores/appStore'
 import { isToday, isThisWeek, format } from 'date-fns'
+import hark from 'hark'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -199,4 +200,14 @@ export async function waitFor(n: number) {
 			res('ok')
 		}, n * 1000)
 	})
+}
+
+export function monitorStream(stream: MediaStream) {
+	const speechEvent = hark(stream)
+	speechEvent.on('speaking', () =>
+		useAppStore.getState().setSpeaking(stream.id, true)
+	)
+	speechEvent.on('stopped_speaking', () =>
+		useAppStore.getState().setSpeaking(stream.id, false)
+	)
 }

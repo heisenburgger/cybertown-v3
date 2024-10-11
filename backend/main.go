@@ -6,10 +6,12 @@ import (
 	"backend/types"
 	"backend/utils"
 	"context"
-	"github.com/caarlos0/env/v11"
-	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+
+	"github.com/caarlos0/env/v11"
+	"github.com/joho/godotenv"
+	"github.com/pion/webrtc/v4"
 )
 
 type application struct {
@@ -45,11 +47,15 @@ func main() {
 		log.Fatalf("failed to get bot: %v", err)
 	}
 
+	settingEngine := webrtc.SettingEngine{}
+	settingEngine.SetAnsweringDTLSRole(webrtc.DTLSRoleServer)
+	webrtcAPI := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine))
+
 	app := application{
 		repo: repo,
 		svc:  svc,
 		conf: &conf,
-		ss:   newSocketServer(repo, svc, &conf, bot, emojis),
+		ss:   newSocketServer(repo, svc, webrtcAPI, &conf, bot, emojis),
 	}
 
 	server := http.Server{

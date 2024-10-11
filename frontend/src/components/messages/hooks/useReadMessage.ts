@@ -1,7 +1,7 @@
 import { useUpdateDM } from '@/hooks/mutations/useUpdateDM'
 import { bc } from '@/lib/bc'
 import { useAppStore } from '@/stores/appStore'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 import { useEffect, useRef } from 'react'
 import { useInView } from 'react-intersection-observer'
 

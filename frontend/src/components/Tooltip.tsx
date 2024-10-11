@@ -16,7 +16,7 @@ export const Tooltip = React.forwardRef((props: Props, _ref) => {
 				</RTooltip.Trigger>
 				<RTooltip.Portal>
 					<RTooltip.Content sideOffset={8}>
-						<p className="rounded-lg p-1 px-3 shadow-md bg-bg border border-border max-w-[300px]">
+						<p className="rounded-lg p-1 px-3 bg-bg border border-border max-w-[300px]">
 							{title}
 						</p>
 						<RTooltip.Arrow className="fill-brand" />

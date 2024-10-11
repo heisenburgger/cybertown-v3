@@ -1,6 +1,7 @@
 import { RoomRes, User } from '@/types'
 import { Participants } from './Participants'
 import { useAppStore } from '@/stores/appStore'
+import { RoomControls } from './RoomControls'
 
 type Props = {
 	room: RoomRes | undefined
@@ -14,6 +15,7 @@ export function RoomStagingArea(props: Props) {
 
 	return (
 		<div className="h-full md:border md:border-border rounded-md bg-bg flex flex-col">
+			<RoomControls />
 			<div className="flex-1 flex items-center justify-center">
 				{room?.settings.welcomeMessage && (
 					<p className="text-yellow-500 max-w-[500px] px-4 whitespace-pre-wrap">

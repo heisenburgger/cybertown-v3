@@ -26,6 +26,19 @@ export type RoomSettings = {
 	welcomeMessage?: string
 }
 
+export type Message = {
+	id: string
+	content: string
+	createdAt: string
+	from: User
+	roomID: number
+	reactions: Record<string, Record<number, User>>
+	isEdited?: boolean
+	isDeleted?: boolean
+	replyTo?: string
+	participant?: User
+}
+
 export type CreateRoom = {
 	topic: string
 	maxParticipants: number

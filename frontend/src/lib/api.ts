@@ -9,7 +9,7 @@ import {
 	RelationRes,
 	DMsRes,
 } from '@/types'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 import { Option } from '@/components/Select'
 
 export const api = {

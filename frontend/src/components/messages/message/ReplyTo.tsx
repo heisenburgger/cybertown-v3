@@ -1,4 +1,4 @@
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 import { MessageContent } from './MessageContent'
 import { scrollToMessage } from '@/lib/utils'
 

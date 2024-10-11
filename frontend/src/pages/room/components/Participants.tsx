@@ -2,6 +2,8 @@ import { RoomRes, User } from '@/types'
 import { ParticipantOptions } from './ParticipantOptions'
 import { useAppStore } from '@/stores/appStore'
 import { cn } from '@/lib/utils'
+import { MicOff as MicOffIcon } from 'lucide-react'
+import { Waveform } from './Waveform'
 
 type Props = {
 	room: RoomRes
@@ -15,12 +17,14 @@ type Props = {
 export function Participants(props: Props) {
 	const { room } = props
 	const user = useAppStore().user
+	const streams = useAppStore().roomStreams
 
 	return (
 		<div className="flex gap-3 overflow-x-auto overflow-y-hidden scroller py-2 px-3">
 			{room.participants.map((p, i) => {
 				const isHost = room.settings.host.id === p.id
 				const isCoHost = room.settings.coHosts?.includes(p.id)
+				const stream = streams[p.sid] ?? { speaking: false, mute: true }
 				return (
 					<div
 						key={p.sid}
@@ -53,6 +57,14 @@ export function Participants(props: Props) {
 							<p className="absolute text-white invisible group-hover:visible top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
 								{p.username}
 							</p>
+							<div className="absolute bottom-[2px] right-1">
+								{!stream.mute && stream.speaking && <Waveform />}
+								{stream.mute && (
+									<div className="bg-black/35 p-1 rounded-full">
+										<MicOffIcon size={14} strokeWidth={1.5} />
+									</div>
+								)}
+							</div>
 						</div>
 						{user?.id !== p.id && (
 							<ParticipantOptions

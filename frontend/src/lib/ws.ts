@@ -1,9 +1,10 @@
 import { config } from '@/config'
 import { ClientEvent } from '@/types/client-event'
-import { BroadcastEvent } from '@/types/broadcast'
+import { ServerEvent } from '@/types/server-event'
 import { generateRandomID, queryClient } from './utils'
 import { useAppStore } from '@/stores/appStore'
 import { RoomRole } from '@/types'
+import { peer } from '@/lib/peer'
 
 class WS {
 	private socket: WebSocket
@@ -27,7 +28,10 @@ class WS {
 
 		socket.onmessage = (e: MessageEvent) => {
 			try {
-				const event: BroadcastEvent = JSON.parse(e.data)
+				const event: ServerEvent = JSON.parse(e.data)
+				if (event.name !== 'PEER_ICE_CANDIDATE') {
+					console.log('event', event)
+				}
 				switch (event.name) {
 					case 'JOINED_ROOM_BROADCAST':
 					case 'LEFT_ROOM_BROADCAST':
@@ -82,6 +86,38 @@ class WS {
 						}
 						useAppStore.getState().error(event)
 						break
+					case 'PEER_MUTE_BROADCAST':
+						if (event.data.roomID !== this.roomID) {
+							return
+						}
+						useAppStore.getState().setMute(event)
+						break
+					case 'PEER_ICE_CANDIDATE':
+						if (event.data.roomID !== this.roomID) {
+							return
+						}
+						const candiate = JSON.parse(event.data.candidate)
+						peer.pc!.addIceCandidate(candiate)
+						break
+					case 'PEER_ANSWER':
+						if (event.data.roomID !== this.roomID) {
+							return
+						}
+
+						peer.pc!.setRemoteDescription(JSON.parse(event.data.answer))
+						break
+					case 'PEER_OFFER':
+						if (event.data.roomID !== this.roomID) {
+							return
+						}
+						peer.acceptOffer(event.data.offer)
+						break
+					case 'PEER_STREAMS':
+						if (event.data.roomID !== this.roomID) {
+							return
+						}
+						useAppStore.getState().addToRoomStreams(event.data.streams)
+						break
 					default:
 						console.error('unknown event', event)
 				}
@@ -100,6 +136,7 @@ class WS {
 		this.roomID = roomID
 		this.joinRoomKey = generateRandomID()
 
+		peer.createPeer()
 		this.sendClientEvent({
 			name: 'JOIN_ROOM',
 			data: {
@@ -226,6 +263,46 @@ class WS {
 				roomID: this.roomID!,
 				duration,
 				clearChat,
+			},
+		})
+	}
+
+	peerICECandidate(candidate: string) {
+		this.sendClientEvent({
+			name: 'PEER_ICE_CANDIDATE',
+			data: {
+				candidate,
+				roomID: this.roomID!,
+			},
+		})
+	}
+
+	peerOffer(offer: string) {
+		this.sendClientEvent({
+			name: 'PEER_OFFER',
+			data: {
+				offer,
+				roomID: this.roomID!,
+			},
+		})
+	}
+
+	peerAnswer(answer: string) {
+		this.sendClientEvent({
+			name: 'PEER_ANSWER',
+			data: {
+				answer,
+				roomID: this.roomID!,
+			},
+		})
+	}
+
+	peerMute(mute: boolean) {
+		this.sendClientEvent({
+			name: 'PEER_MUTE',
+			data: {
+				mute,
+				roomID: this.roomID!,
 			},
 		})
 	}

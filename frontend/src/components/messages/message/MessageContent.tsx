@@ -1,5 +1,5 @@
 import { toHTML } from '@/lib/utils'
-import { Message } from '@/types/broadcast'
+import { Message } from '@/types'
 
 type Props = {
 	message: Message

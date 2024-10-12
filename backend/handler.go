@@ -150,6 +150,7 @@ func (app *application) createRoomHandler(w http.ResponseWriter, r *http.Request
 		app.ss.rooms[roomID] = &socketRoom{
 			lastActivity: time.Now().UTC(),
 			conns:        make(map[*websocket.Conn]struct{}),
+			tracks:       make(map[string]*roomTrack),
 		}
 
 		app.ss.broadcastEvent(&t.Event{

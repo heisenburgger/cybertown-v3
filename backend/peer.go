@@ -114,8 +114,6 @@ func (p *Peer) acceptOffer(b []byte) {
 		log.Printf("peer answer event: failed to send answer: %v", err)
 		return
 	}
-
-	log.Println("accepted offer")
 }
 
 func (p *Peer) acceptAnswer(b []byte) {

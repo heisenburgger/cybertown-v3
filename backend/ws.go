@@ -223,12 +223,11 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 	room.lastActivity = time.Now().UTC()
 
 	p.OnTrack(func(tr *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
-		track, err := s.addTrack(data.RoomID, p.conn, tr)
+		track, err := s.addTrack(data.RoomID, conn, tr)
 		if err != nil {
 			log.Printf("failed to add track: %v", err)
 			return
 		}
-		log.Println("received track id:", tr.ID())
 		defer s.removeTrack(data.RoomID, tr.ID())
 
 		buf := make([]byte, 1500)
@@ -888,13 +887,13 @@ func (s *socketServer) broadcastTracks(roomID int, c *websocket.Conn, tr *webrtc
 
 		_, err := peer.AddTrack(tr)
 		if err != nil {
-			log.Println("broadcast tracks: failed to add track to peer: %v", err)
+			log.Printf("broadcast tracks: failed to add track to peer: %v", err)
 			continue
 		}
 
 		err = peer.makeOffer()
 		if err != nil {
-			log.Println("broadcast tracks: failed to make offer: %v", err)
+			log.Printf("broadcast tracks: failed to make offer: %v", err)
 			continue
 		}
 	}

@@ -103,6 +103,8 @@ func (p *Peer) acceptOffer(b []byte) {
 		return
 	}
 
+	log.Println(data.Offer)
+
 	err = p.SetRemoteDescription(d)
 	if err != nil {
 		log.Printf("peer answer event: failed to set remote desc: %v", err)

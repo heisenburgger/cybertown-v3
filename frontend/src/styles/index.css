@@ -172,3 +172,20 @@ em-emoji-picker {
 .participant:hover::before {
 	@apply bg-black/85;
 }
+
+.separator {
+	@apply flex items-center text-center;
+}
+
+.separator::before,
+.separator::after {
+	@apply flex-1 content-[""] border-t border-border;
+}
+
+.separator:not(:empty)::before {
+	@apply mr-2;
+}
+
+.separator:not(:empty)::after {
+	@apply ml-2;
+}

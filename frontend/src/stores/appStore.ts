@@ -81,8 +81,9 @@ type Actions = {
 	setJoinedAnotherRoom: (isJoined: boolean) => void
 	setRoomTab: (tab: string) => void
 	setUnreadCount: (count: number) => void
-	addToRoomStreams: (streams: Record<string, RoomStream>) => void
+	addToRoomStreams: (streams: Record<string, string>) => void
 	setSpeaking: (streamID: string, speaking: boolean) => void
+	setVolume: (pID: string, volume: number) => void
 
 	// scroll
 	setScrollPercent: (percent: number) => void
@@ -218,7 +219,18 @@ export const useAppStore = create<State & Actions>()(
 
 		addToRoomStreams: (streams) =>
 			set((state) => {
-				state.roomStreams = { ...state.roomStreams, ...streams }
+				Object.entries(streams).forEach(([pID, streamID]) => {
+					if (!state.roomStreams[pID]) {
+						state.roomStreams[pID] = {
+							streamID,
+							mute: true,
+							volume: 100,
+							speaking: false,
+						}
+					} else {
+						state.roomStreams[pID].streamID = streamID
+					}
+				})
 			}),
 
 		addMsg: (event) =>
@@ -378,6 +390,19 @@ export const useAppStore = create<State & Actions>()(
 			set((state) => {
 				state.dm[participantID] = []
 				state.selectedDM = null
+			}),
+
+		setVolume: (pID, volume) =>
+			set((state) => {
+				if (!state.roomStreams[pID]) {
+					state.roomStreams[pID] = {
+						speaking: false,
+						mute: true,
+						streamID: null,
+						volume: 100,
+					}
+				}
+				state.roomStreams[pID].volume = volume
 			}),
 
 		setSpeaking: (streamID, speaking) =>

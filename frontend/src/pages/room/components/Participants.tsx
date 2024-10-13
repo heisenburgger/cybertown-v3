@@ -75,6 +75,7 @@ export function Participants(props: Props) {
 								participant={p}
 								room={room}
 								setPM={props.setPM}
+								sid={p.sid}
 							/>
 						)}
 					</div>

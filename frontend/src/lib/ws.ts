@@ -29,9 +29,6 @@ class WS {
 		socket.onmessage = (e: MessageEvent) => {
 			try {
 				const event: ServerEvent = JSON.parse(e.data)
-				if (event.name !== 'PEER_ICE_CANDIDATE') {
-					console.log('event', event)
-				}
 				switch (event.name) {
 					case 'JOINED_ROOM_BROADCAST':
 					case 'LEFT_ROOM_BROADCAST':

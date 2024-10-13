@@ -259,17 +259,13 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 		}
 	})
 
-	streamMap := make(map[string]map[string]any)
+	streamMap := make(map[string]string)
 	for _, t := range s.rooms[data.RoomID].tracks {
 		if _, err := p.AddTrack(t.track); err != nil {
 			log.Printf("failed to add track to new peer: %v", err)
 			continue
 		}
-		streamMap[t.pID] = map[string]any{
-			"streamID": t.track.StreamID(),
-			"speaking": false,
-			"mute":     true,
-		}
+		streamMap[t.pID] = t.track.StreamID()
 	}
 
 	utils.WriteEvent(conn, &t.Event{
@@ -874,12 +870,8 @@ func (s *socketServer) addTrack(roomID int, conn *websocket.Conn, tr *webrtc.Tra
 		Name: "PEER_STREAMS",
 		Data: map[string]any{
 			"roomID": roomID,
-			"streams": map[string]any{
-				pID: map[string]any{
-					"streamID": tr.StreamID(),
-					"speaking": false,
-					"mute":     true,
-				},
+			"streams": map[string]string{
+				pID: tr.StreamID(),
 			},
 		},
 	})

@@ -26,7 +26,7 @@ export type PeerStreamsEvent = {
 	name: 'PEER_STREAMS'
 	data: {
 		roomID: number
-		streams: Record<string, RoomStream>
+		streams: Record<string, string>
 	}
 }
 
@@ -39,7 +39,8 @@ export type PeerMuteEvent = {
 }
 
 export type RoomStream = {
-	streamID: string
+	streamID: string | null
 	speaking: boolean
 	mute: boolean
+	volume: number // 1 - 100
 }

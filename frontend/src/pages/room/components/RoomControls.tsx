@@ -20,6 +20,7 @@ export function RoomControls() {
 				await peer.speak()
 				setMic(true)
 				hasStream.current = true
+				ws.peerMute(false)
 			} catch (err) {
 				console.error('failed to get audio stream', err)
 				setToast(true, {

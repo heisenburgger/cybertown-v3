@@ -28,20 +28,25 @@ class Peer {
 		this.pc = pc
 
 		pc.ontrack = (e) => {
-			console.log('streams', useAppStore.getState().roomStreams)
-			console.log('received track event:', e)
-
 			if (e.track.kind !== 'audio') {
+				console.warn('skipping incompatible track', e.track.kind)
+				return
+			}
+			const [stream] = e.streams
+
+			const roomStreams = useAppStore.getState().roomStreams
+			const entry = Object.entries(roomStreams).find(
+				([_, value]) => value.streamID === stream.id
+			)
+
+			if (!entry) {
+				console.warn('failed to get stream entry from store', stream.id)
 				return
 			}
 
-			const element = document.createElement('audio')
-			element.dataset.id = e.streams[0].id
-			element.srcObject = e.streams[0]
-			element.autoplay = true
-			element.play()
-			document.body.appendChild(element)
-			monitorStream(e.streams[0])
+			const [pID, value] = entry
+			this.playStream(pID, value.volume ?? 100, stream)
+			monitorStream(stream)
 		}
 
 		pc.onicecandidate = (e) => {
@@ -50,6 +55,23 @@ class Peer {
 			}
 			ws.peerICECandidate(JSON.stringify(e.candidate))
 		}
+	}
+
+	async playStream(pID: string, volume: number, stream: MediaStream) {
+		const existingAudio = document.querySelector(`audio[data-pid="${pID}"]`)
+		if (existingAudio) {
+			existingAudio.remove()
+		}
+
+		const element = document.createElement('audio')
+		element.dataset.id = stream.id
+		element.dataset.pid = pID
+		element.srcObject = stream
+		element.autoplay = true
+		element.volume = volume / 100
+		element.play()
+
+		document.body.appendChild(element)
 	}
 
 	async speak() {

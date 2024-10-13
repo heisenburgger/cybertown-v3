@@ -1,4 +1,5 @@
 import { bc } from '@/lib/bc'
+import { debounce } from '@/lib/utils'
 import { useAppStore } from '@/stores/appStore'
 import { User } from '@/types'
 import { useEffect, RefObject } from 'react'
@@ -12,14 +13,6 @@ export const useScrollPercentage = (
 	const hasScrolledDown = useAppStore().scroll.hasScrolledDown
 	const setScrollPercent = useAppStore().setScrollPercent
 	const setScrolledDown = useAppStore().setScrolledDown
-
-	const debounce = (func: Function, delay: number) => {
-		let timeout: ReturnType<typeof setTimeout>
-		return (...args: any[]) => {
-			clearTimeout(timeout)
-			timeout = setTimeout(() => func(...args), delay)
-		}
-	}
 
 	useEffect(() => {
 		const container = containerRef.current

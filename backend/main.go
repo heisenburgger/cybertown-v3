@@ -48,8 +48,10 @@ func main() {
 	}
 
 	settingEngine := webrtc.SettingEngine{}
+	mediaEngine := webrtc.MediaEngine{}
+	mediaEngine.RegisterDefaultCodecs()
 	settingEngine.SetAnsweringDTLSRole(webrtc.DTLSRoleServer)
-	webrtcAPI := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine))
+	webrtcAPI := webrtc.NewAPI(webrtc.WithSettingEngine(settingEngine), webrtc.WithMediaEngine(&mediaEngine))
 
 	app := application{
 		repo: repo,

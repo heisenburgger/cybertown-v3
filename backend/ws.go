@@ -16,7 +16,8 @@ import (
 	"time"
 
 	"github.com/lithammer/shortuuid/v4"
-	"github.com/pion/webrtc/v4"
+	"github.com/pion/rtp"
+	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 )
@@ -223,6 +224,7 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 	room.lastActivity = time.Now().UTC()
 
 	p.OnTrack(func(tr *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
+		log.Printf("received track: %s", tr.ID())
 		track, err := s.addTrack(data.RoomID, conn, tr)
 		if err != nil {
 			log.Printf("failed to add track: %v", err)
@@ -231,14 +233,24 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 		defer s.removeTrack(data.RoomID, tr.ID())
 
 		buf := make([]byte, 1500)
+		rtpPkt := &rtp.Packet{}
+
 		for {
 			i, _, err := tr.Read(buf)
 			if err != nil {
 				log.Printf("failed to read remote track: %v", err)
 				return
 			}
-			if _, err := track.Write(buf[:i]); err != nil {
-				log.Printf("failed to write to remote track: %v", err)
+
+			if err = rtpPkt.Unmarshal(buf[:i]); err != nil {
+				log.Printf("failed to unmarshal rtp packet: %v", err)
+				return
+			}
+			rtpPkt.Extension = false
+			rtpPkt.Extensions = nil
+
+			if err = track.WriteRTP(rtpPkt); err != nil {
+				log.Printf("failed to write rtp packet: %v", err)
 				return
 			}
 		}

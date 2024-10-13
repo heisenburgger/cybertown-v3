@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/pion/webrtc/v4"
+	"github.com/pion/webrtc/v3"
 	"nhooyr.io/websocket"
 )
 

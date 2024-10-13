@@ -11,7 +11,7 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
-	"github.com/pion/webrtc/v4"
+	"github.com/pion/webrtc/v3"
 )
 
 type application struct {

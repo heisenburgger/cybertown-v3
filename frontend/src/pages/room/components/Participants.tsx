@@ -61,7 +61,11 @@ export function Participants(props: Props) {
 								{!stream.mute && stream.speaking && <Waveform />}
 								{stream.mute && (
 									<div className="bg-black/35 p-1 rounded-full">
-										<MicOffIcon size={14} strokeWidth={1.5} />
+										<MicOffIcon
+											size={14}
+											strokeWidth={1.5}
+											className="stroke-white"
+										/>
 									</div>
 								)}
 							</div>

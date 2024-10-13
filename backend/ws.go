@@ -224,9 +224,9 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 	room.lastActivity = time.Now().UTC()
 
 	p.OnTrack(func(tr *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
+		// NOTE:: to prevent empty track/stream id
 		time.Sleep(time.Second * 2)
-		log.Printf("Received track: Track ID: '%s', Stream ID: '%s', Kind: %s, SSRC: %d, PayloadType: %d",
-			tr.ID(), tr.StreamID(), tr.Kind().String(), tr.SSRC(), tr.PayloadType())
+		log.Printf("Received track: Track ID: %q, Stream ID: %q", tr.ID(), tr.StreamID())
 
 		track, err := s.addTrack(data.RoomID, conn, tr)
 		if err != nil {

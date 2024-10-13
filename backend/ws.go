@@ -224,7 +224,8 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 	room.lastActivity = time.Now().UTC()
 
 	p.OnTrack(func(tr *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
-		log.Printf("received track: track id: %s, stream id: %s", tr.ID(), tr.StreamID())
+		log.Printf("Received track: Track ID: '%s', Stream ID: '%s', Kind: %s, SSRC: %d, PayloadType: %d",
+			tr.ID(), tr.StreamID(), tr.Kind().String(), tr.SSRC(), tr.PayloadType())
 		track, err := s.addTrack(data.RoomID, conn, tr)
 		if err != nil {
 			log.Printf("failed to add track: %v", err)
@@ -918,6 +919,7 @@ func (s *socketServer) removeTrack(roomID int, trackID string) {
 
 func (s *socketServer) NewPeer(roomID int, conn *websocket.Conn) (*Peer, error) {
 	p, err := s.webrtcAPI.NewPeerConnection(webrtc.Configuration{
+		SDPSemantics: webrtc.SDPSemanticsUnifiedPlanWithFallback,
 		ICEServers: []webrtc.ICEServer{
 			{
 				URLs: []string{

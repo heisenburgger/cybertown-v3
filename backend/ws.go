@@ -224,7 +224,7 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 	room.lastActivity = time.Now().UTC()
 
 	p.OnTrack(func(tr *webrtc.TrackRemote, r *webrtc.RTPReceiver) {
-		log.Printf("received track: %s", tr.ID())
+		log.Printf("received track: track id: %s, stream id: %s", tr.ID(), tr.StreamID())
 		track, err := s.addTrack(data.RoomID, conn, tr)
 		if err != nil {
 			log.Printf("failed to add track: %v", err)

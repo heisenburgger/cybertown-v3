@@ -16,6 +16,7 @@ export function RoomPage() {
 	const user = useAppStore().user
 	const isKicked = useAppStore().isKicked
 	const joinedAnotherRoom = useAppStore().joinedAnotherRoom
+	const leftRoom = useAppStore().leftRoom
 	const { isLoading, error } = useJoinRoom(
 		roomID!,
 		user !== null && user !== undefined
@@ -39,13 +40,14 @@ export function RoomPage() {
 		)
 	}
 
-	if (user === null || error || isKicked || joinedAnotherRoom) {
+	if (user === null || error || isKicked || joinedAnotherRoom || leftRoom) {
 		return (
 			<RoomError
 				error={error as APIError}
 				user={user}
 				isKicked={isKicked}
 				joinedAnotherRoom={joinedAnotherRoom}
+				leftRoom={leftRoom}
 			/>
 		)
 	}

@@ -860,9 +860,13 @@ func (s *socketServer) addTrack(roomID int, conn *websocket.Conn, tr *webrtc.Tra
 		return nil, err
 	}
 
-	pID := s.conns[conn].pID
+	c, ok := s.conns[conn]
+	if !ok {
+		return nil, errors.New("socket conn is missing for track's peer")
+	}
+
 	s.rooms[roomID].tracks[tr.ID()] = &roomTrack{
-		pID:   pID,
+		pID:   c.pID,
 		track: track,
 	}
 
@@ -871,7 +875,7 @@ func (s *socketServer) addTrack(roomID int, conn *websocket.Conn, tr *webrtc.Tra
 		Data: map[string]any{
 			"roomID": roomID,
 			"streams": map[string]string{
-				pID: tr.StreamID(),
+				c.pID: tr.StreamID(),
 			},
 		},
 	})

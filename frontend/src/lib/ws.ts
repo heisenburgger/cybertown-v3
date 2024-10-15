@@ -7,7 +7,7 @@ import { RoomRole } from '@/types'
 import { peer } from '@/lib/peer'
 
 class WS {
-	private socket: WebSocket
+	private socket: WebSocket | null = null
 	private static instance: WS
 	roomID: number | null = null
 	joinRoomKey: string | null = null
@@ -20,10 +20,19 @@ class WS {
 	}
 
 	constructor() {
+		this.establishSocketConn()
+	}
+
+	establishSocketConn() {
+		this.socket = null
 		const socket = new WebSocket(config.wsURL)
 
 		socket.onclose = function (e: CloseEvent) {
 			console.error('socket connection closed', e.code)
+		}
+
+		socket.onopen = () => {
+			console.log('socket connection established')
 		}
 
 		socket.onmessage = (e: MessageEvent) => {
@@ -305,11 +314,11 @@ class WS {
 	}
 
 	sendClientEvent(event: ClientEvent) {
-		this.socket.send(JSON.stringify(event))
+		this.socket!.send(JSON.stringify(event))
 	}
 
 	close() {
-		this.socket.close()
+		this.socket!.close()
 	}
 }
 

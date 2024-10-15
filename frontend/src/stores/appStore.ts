@@ -22,6 +22,7 @@ type State = {
 		expiredAt: string
 	} | null
 	joinedAnotherRoom: boolean
+	leftRoom: boolean
 
 	dm: Record<string, Message[]>
 
@@ -84,6 +85,7 @@ type Actions = {
 	addToRoomStreams: (streams: Record<string, string>) => void
 	setSpeaking: (streamID: string, speaking: boolean) => void
 	setVolume: (pID: string, volume: number) => void
+	setLeftRoom: (left: boolean) => void
 
 	// scroll
 	setScrollPercent: (percent: number) => void
@@ -111,6 +113,7 @@ export const useAppStore = create<State & Actions>()(
 	immer((set) => ({
 		isKicked: null,
 		joinedAnotherRoom: false,
+		leftRoom: false,
 
 		user: undefined,
 
@@ -173,6 +176,11 @@ export const useAppStore = create<State & Actions>()(
 		setJoinedAnotherRoom: (isJoined) =>
 			set((state) => {
 				state.joinedAnotherRoom = isJoined
+			}),
+
+		setLeftRoom: (left) =>
+			set((state) => {
+				state.leftRoom = left
 			}),
 
 		setPopup: (popup, visibility) =>

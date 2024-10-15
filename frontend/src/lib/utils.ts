@@ -219,3 +219,8 @@ export function debounce(func: Function, delay: number) {
 		timeout = setTimeout(() => func(...args), delay)
 	}
 }
+
+export function removeAudioStreams() {
+	const audio = Array.from(document.querySelectorAll('audio[data-pid]'))
+	audio.forEach((el) => el.remove())
+}

@@ -50,6 +50,7 @@ type socketServer struct {
 	cfg          *t.Config
 	aiMsgRequest chan *t.AIMessageRequest
 	webrtcAPI    *webrtc.API
+	ips          []string
 }
 
 func newSocketServer(repo *db.Repo, svc *service.Service, webrtcAPI *webrtc.API, cfg *t.Config, bot *t.User, emojis map[string]struct{}) *socketServer {
@@ -990,6 +991,8 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	app.ss.accept(conn, user)
 
+	var failedReadAttemps int
+
 	for {
 		var event t.Event
 		err := wsjson.Read(context.Background(), conn, &event)
@@ -997,7 +1000,22 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 			if websocket.CloseStatus(err) != -1 {
 				return
 			}
-			log.Printf("error reading message from socket: %v", err)
+
+			ip := r.RemoteAddr
+			forwarded := r.Header.Get("X-Forwarded-For")
+			if forwarded != "" {
+				ip = forwarded
+			}
+
+			log.Printf("error reading message from socket: ip: %s err: %v", ip, err)
+			failedReadAttemps++
+
+			if failedReadAttemps >= 25 {
+				app.ss.ips = append(app.ss.ips, ip)
+				log.Printf("adding ip to whitelist: %s\n", ip)
+				return
+			}
+
 			continue
 		}
 

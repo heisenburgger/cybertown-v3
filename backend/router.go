@@ -26,7 +26,7 @@ func (app *application) router() http.Handler {
 	router.Handle("GET /languages", http.HandlerFunc(app.getLanguagesHandler))
 
 	v1 := http.NewServeMux()
-	v1.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
+	v1.Handle("/api/v1/", http.StripPrefix("/api/v1", app.loggingMiddleware(app.maliciousIP(router))))
 	v1.Handle("/ws", app.authMiddleware(http.HandlerFunc(app.wsHandler)))
 
 	return v1

@@ -2,12 +2,25 @@ package main
 
 import (
 	"backend/types"
+	"backend/utils"
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 type Middleware func(http.Handler) http.Handler
+
+type statusRecorder struct {
+	http.ResponseWriter
+	status int
+}
+
+func (rec *statusRecorder) WriteHeader(code int) {
+	rec.status = code
+	rec.ResponseWriter.WriteHeader(code)
+}
 
 func createStack(xs ...Middleware) Middleware {
 	return func(next http.Handler) http.Handler {
@@ -66,6 +79,38 @@ func (app *application) isAuthenticated(next http.Handler) http.Handler {
 
 		if _, ok := v.(*types.User); !ok {
 			unauthRequest(w, nil)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		recorder := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
+		next.ServeHTTP(recorder, r)
+		log.Printf("Method: %s, Path: %s, URL: %s, Status: %d, Duration: %s",
+			r.Method,
+			r.URL.Path,
+			r.URL.String(),
+			recorder.status,
+			time.Since(start),
+		)
+	})
+}
+
+func (app *application) maliciousIP(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ip := r.RemoteAddr
+		forwarded := r.Header.Get("X-Forwarded-For")
+		if forwarded != "" {
+			ip = forwarded
+		}
+
+		if utils.Includes(app.ss.ips, ip) {
+			forbiddenError(w, fmt.Errorf("banned ip: %s\n", ip))
 			return
 		}
 

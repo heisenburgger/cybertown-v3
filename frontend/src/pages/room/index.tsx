@@ -33,7 +33,10 @@ export function RoomPage() {
 		bc.sendMessage({ name: 'VISITED_ROOM_PAGE' })
 	}, [])
 
-	if (isLoading || user === undefined || !socketConnected) {
+	const cantJoinRoom =
+		user === null || error || isKicked || joinedAnotherRoom || leftRoom
+
+	if (isLoading || user === undefined || (!socketConnected && !cantJoinRoom)) {
 		return (
 			<div className="h-screen flex items-center justify-center">
 				<LoadingIcon className="text-brand/20 fill-brand w-8 h-8" />
@@ -41,7 +44,7 @@ export function RoomPage() {
 		)
 	}
 
-	if (user === null || error || isKicked || joinedAnotherRoom || leftRoom) {
+	if (cantJoinRoom) {
 		return (
 			<RoomError
 				error={error as APIError}

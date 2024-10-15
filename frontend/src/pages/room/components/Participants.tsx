@@ -4,20 +4,18 @@ import { useAppStore } from '@/stores/appStore'
 import { cn } from '@/lib/utils'
 import { MicOff as MicOffIcon } from 'lucide-react'
 import { Waveform } from './Waveform'
+import { useState } from 'react'
 
 type Props = {
 	room: RoomRes
 	setPM: (pm: User | null) => void
 }
 
-/*
- - For fluid sizing, constrain the image height and width using min/max
- - `justify-center` behaves wierdly with 'overflow-x-auto' (so using margin auto)
-*/
 export function Participants(props: Props) {
 	const { room } = props
-	const user = useAppStore().user
+	const sid = useAppStore().sid
 	const streams = useAppStore().roomStreams
+	const [open, setOpen] = useState<Record<string, boolean>>({})
 
 	return (
 		<div className="flex gap-3 overflow-x-auto overflow-y-hidden scroller py-2 px-3">
@@ -29,14 +27,14 @@ export function Participants(props: Props) {
 					<div
 						key={p.sid}
 						className={cn(
-							'shadow-sm text-center text-sm relative participant',
+							'shadow-sm text-center text-sm relative participant min-h-[96px]',
 							{
 								'ml-auto': i === 0,
 								'mr-auto': room.participants.length - 1 === i,
 							}
 						)}
 					>
-						<div className="relative group participant">
+						<div className="relative group participant h-full">
 							<img
 								src={p.avatar}
 								key={p.sid}
@@ -70,12 +68,19 @@ export function Participants(props: Props) {
 								)}
 							</div>
 						</div>
-						{user?.id !== p.id && (
+						{sid !== p.sid && (
 							<ParticipantOptions
 								participant={p}
 								room={room}
 								setPM={props.setPM}
 								sid={p.sid}
+								open={open[p.sid]}
+								setOpen={(open) => {
+									setOpen((prev) => ({
+										...prev,
+										[p.sid]: open,
+									}))
+								}}
 							/>
 						)}
 					</div>

@@ -18,10 +18,14 @@ import { immer } from 'zustand/middleware/immer'
 import { RoomStream } from '@/types/peer'
 
 type State = {
+	socketConnected: boolean
+	peerConnected: boolean
+
 	isKicked: {
 		expiredAt: string
 	} | null
 	joinedAnotherRoom: boolean
+	leftRoom: boolean
 
 	dm: Record<string, Message[]>
 
@@ -84,6 +88,9 @@ type Actions = {
 	addToRoomStreams: (streams: Record<string, string>) => void
 	setSpeaking: (streamID: string, speaking: boolean) => void
 	setVolume: (pID: string, volume: number) => void
+	setLeftRoom: (left: boolean) => void
+	setSocketConnected: (status: boolean) => void
+	setPeerConnected: (status: boolean) => void
 
 	// scroll
 	setScrollPercent: (percent: number) => void
@@ -109,8 +116,12 @@ type Actions = {
 
 export const useAppStore = create<State & Actions>()(
 	immer((set) => ({
+		socketConnected: false,
+		peerConnected: false,
+
 		isKicked: null,
 		joinedAnotherRoom: false,
+		leftRoom: false,
 
 		user: undefined,
 
@@ -173,6 +184,21 @@ export const useAppStore = create<State & Actions>()(
 		setJoinedAnotherRoom: (isJoined) =>
 			set((state) => {
 				state.joinedAnotherRoom = isJoined
+			}),
+
+		setLeftRoom: (left) =>
+			set((state) => {
+				state.leftRoom = left
+			}),
+
+		setSocketConnected: (status) =>
+			set((state) => {
+				state.socketConnected = status
+			}),
+
+		setPeerConnected: (status) =>
+			set((state) => {
+				state.peerConnected = status
 			}),
 
 		setPopup: (popup, visibility) =>

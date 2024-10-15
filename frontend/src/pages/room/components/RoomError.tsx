@@ -1,4 +1,4 @@
-import { APIError, getGoogleOAuthURL } from '@/lib/utils'
+import { APIError, getGoogleOAuthURL, removeAudioStreams } from '@/lib/utils'
 import { User } from '@/types'
 import { Link } from 'react-router-dom'
 import {
@@ -11,6 +11,7 @@ import {
 import { useEffect } from 'react'
 import { ws } from '@/lib/ws'
 import { format } from 'date-fns'
+import { peer } from '@/lib/peer'
 
 type Props = {
 	error: APIError | undefined
@@ -19,6 +20,7 @@ type Props = {
 		expiredAt: string
 	} | null
 	joinedAnotherRoom: boolean
+	leftRoom: boolean
 }
 
 export function RoomError(props: Props) {
@@ -26,6 +28,10 @@ export function RoomError(props: Props) {
 
 	useEffect(() => {
 		ws.close()
+		if (peer.pc) {
+			peer.pc.close()
+		}
+		removeAudioStreams()
 	}, [])
 
 	if (!user) {
@@ -38,6 +44,10 @@ export function RoomError(props: Props) {
 
 	if (error?.status === 404) {
 		return <Error status={error.status} />
+	}
+
+	if (props.leftRoom) {
+		return <Error status={418} />
 	}
 
 	if (error?.status === 403 || isKicked) {
@@ -55,7 +65,7 @@ export function RoomError(props: Props) {
 export function Error(props: { status: number }) {
 	const contentMap: Record<number, Record<string, any>> = {
 		404: {
-			title: "This room can't be found",
+			title: 'Room not found',
 			desc: "The room you're looking for doesn't seem to exist",
 			icon: <DoorOpenIcon className="stroke-pink-500 mb-2 h-12 w-12" />,
 		},
@@ -74,6 +84,12 @@ export function Error(props: { status: number }) {
 			desc: "You've joined a room in another tab.",
 			icon: <RoomIcon className="stroke-orange-500 mb-2 h-12 w-12" />,
 		},
+		418: {
+			// teapot :)
+			title: 'Left Room',
+			desc: 'You have left the room. You can rejoin at any time.',
+			icon: <RoomIcon className="stroke-purple-500 mb-2 h-12 w-12" />,
+		},
 	}
 
 	const content = contentMap[props.status]
@@ -84,6 +100,7 @@ export function Error(props: { status: number }) {
 				{content.icon}
 				<h1 className="text-4xl font-bold mb-3">{content.title}</h1>
 				<p className="text-muted mb-5">{content.desc}</p>
+
 				{props.status === 401 && (
 					<Link
 						to={getGoogleOAuthURL()}
@@ -91,6 +108,15 @@ export function Error(props: { status: number }) {
 					>
 						Login
 					</Link>
+				)}
+
+				{props.status === 418 && (
+					<button
+						onClick={() => window.location.reload()}
+						className="bg-brand text-brand-fg px-4 py-2 rounded-md focus:ring-offset-2 focus:ring-offset-bg"
+					>
+						Rejoin room
+					</button>
 				)}
 			</div>
 		</main>

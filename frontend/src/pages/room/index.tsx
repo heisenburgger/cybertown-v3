@@ -16,6 +16,8 @@ export function RoomPage() {
 	const user = useAppStore().user
 	const isKicked = useAppStore().isKicked
 	const joinedAnotherRoom = useAppStore().joinedAnotherRoom
+	const leftRoom = useAppStore().leftRoom
+	const socketConnected = useAppStore().socketConnected
 	const { isLoading, error } = useJoinRoom(
 		roomID!,
 		user !== null && user !== undefined
@@ -31,7 +33,7 @@ export function RoomPage() {
 		bc.sendMessage({ name: 'VISITED_ROOM_PAGE' })
 	}, [])
 
-	if (isLoading || user === undefined) {
+	if (isLoading || user === undefined || !socketConnected) {
 		return (
 			<div className="h-screen flex items-center justify-center">
 				<LoadingIcon className="text-brand/20 fill-brand w-8 h-8" />
@@ -39,13 +41,14 @@ export function RoomPage() {
 		)
 	}
 
-	if (user === null || error || isKicked || joinedAnotherRoom) {
+	if (user === null || error || isKicked || joinedAnotherRoom || leftRoom) {
 		return (
 			<RoomError
 				error={error as APIError}
 				user={user}
 				isKicked={isKicked}
 				joinedAnotherRoom={joinedAnotherRoom}
+				leftRoom={leftRoom}
 			/>
 		)
 	}

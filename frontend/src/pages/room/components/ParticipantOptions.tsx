@@ -7,6 +7,8 @@ import {
 	MessageSquareOff as ClearChatIcon,
 	Volume2 as VolumeOnIcon,
 	VolumeX as VolumeOffIcon,
+	Heart as HeartIcon,
+	HeartOff as HeartBrokeIcon,
 } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
 import { RoomRes, User } from '@/types'
@@ -16,33 +18,62 @@ import { KickParticipant } from './KickParticipant'
 import { useState } from 'react'
 import { Slider } from '@/components/Slider'
 import { useVolume } from '@/hooks/useVolume'
+import { useProfile } from '@/hooks/queries/useProfile'
+import { useFollow } from '@/hooks/mutations/useFollow'
+import { queryClient } from '@/lib/utils'
+import { LoadingIcon } from '@/pages/home/components/LoadingIcon'
 
 type Props = {
 	participant: User
 	room: RoomRes
 	setPM: (pm: User | null) => void
 	sid: string
+	open: boolean
+	setOpen: (open: boolean) => void
 }
 
 export function ParticipantOptions(props: Props) {
 	const { settings } = props.room
+
 	const user = useAppStore().user
 	const setRoomTab = useAppStore().setRoomTab
+
+	const [kickOpen, setKickOpen] = useState(false)
+	const [participant, setParticipant] = useState<User | null>(null)
+
+	const isMe = user?.id === props.participant.id
 	const isHost = settings.host.id === user?.id
 	const isCoHost = settings.coHosts?.includes(user?.id as unknown as number)
 	const isParticipantCoHost = settings.coHosts?.includes(props.participant.id)
 	const isParticipantHost = props.participant.id === settings.host.id
 	const hasPermissions = (isHost || isCoHost) && !isParticipantHost
-	const [open, setOpen] = useState(false)
-	const [participant, setParticipant] = useState<User | null>(null)
+
+	const { data: profile } = useProfile(
+		props.participant.id,
+		props.open === true
+	)
+	const { mutateAsync: followMutate, isLoading } = useFollow()
 
 	const volume = useAppStore().roomStreams[props.sid]?.volume ?? 100
 	const setVolume = useAppStore().setVolume
 	useVolume(props.sid, volume)
 
+	async function follow() {
+		if (!profile || !user) {
+			return
+		}
+		await followMutate({
+			isFollowing: profile.isFollowing,
+			followeeID: props.participant.id,
+		})
+		queryClient.invalidateQueries({
+			queryKey: ['profile', props.participant.id],
+		})
+	}
+
 	return (
 		<>
-			<Popover.Root>
+			<Popover.Root open={props.open} onOpenChange={props.setOpen}>
 				<Popover.Trigger asChild>
 					<button className="p-[2px] bg-brand/20 text-brand-fg group-hover:bg-brand absolute right-0 top-0 rounded-bl-md">
 						<OptionsIcon size={14} />
@@ -55,23 +86,42 @@ export function ParticipantOptions(props: Props) {
 						sideOffset={10}
 						onCloseAutoFocus={(e) => e.preventDefault()}
 					>
-						<button
-							className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
-							onClick={() => {
-								setRoomTab('messages')
-								props.setPM(props.participant)
-								setTimeout(() => {
-									const el = document.getElementById('messages-textarea')
-									if (el) {
-										el.focus()
-									}
-								}, 0)
-							}}
-						>
-							<MsgIcon size={18} className="text-muted" />
-							<p>PM</p>
-						</button>
-						{isHost && (
+						{!isMe && (
+							<>
+								<button
+									className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
+									onClick={() => {
+										setRoomTab('messages')
+										props.setPM(props.participant)
+										setTimeout(() => {
+											const el = document.getElementById('messages-textarea')
+											if (el) {
+												el.focus()
+											}
+										}, 0)
+									}}
+								>
+									<MsgIcon size={18} className="text-muted" />
+									<p>PM</p>
+								</button>
+								<button
+									disabled={isLoading}
+									className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
+									onClick={follow}
+								>
+									{profile?.isFollowing && !isLoading ? (
+										<HeartBrokeIcon size={18} className="text-muted" />
+									) : (
+										<HeartIcon size={18} className="text-muted" />
+									)}
+									{isLoading && (
+										<LoadingIcon className="text-brand/20 fill-brand w-4 h-4" />
+									)}
+									<p>{profile?.isFollowing ? 'Unfollow' : 'Follow'}</p>
+								</button>
+							</>
+						)}
+						{isHost && !isMe && (
 							<button
 								className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
 								onClick={() => {
@@ -79,40 +129,43 @@ export function ParticipantOptions(props: Props) {
 										isParticipantCoHost ? 'guest' : 'coHost',
 										props.participant.id
 									)
+									props.setOpen(false)
 								}}
 							>
 								<CoHostIcon size={18} className="text-muted" />
 								<p>{isParticipantCoHost ? 'Unset' : 'Set'} Co-Host</p>
 							</button>
 						)}
-						{isHost && (
+						{isHost && !isMe && (
 							<button
 								className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
 								onClick={() => {
 									ws.transferRoom(props.participant.id)
+									props.setOpen(false)
 								}}
 							>
 								<HostIcon size={18} className="text-muted" />
 								<p>Transfer Room</p>
 							</button>
 						)}
-						{hasPermissions && (
+						{hasPermissions && !isMe && (
 							<button
 								className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
 								onClick={() => {
 									setParticipant(props.participant)
-									setOpen(true)
+									setKickOpen(true)
 								}}
 							>
 								<KickIcon size={18} className="text-muted" />
 								<p>Kick</p>
 							</button>
 						)}
-						{hasPermissions && (
+						{hasPermissions && !isMe && (
 							<button
 								className="flex gap-3 items-center px-2 py-1 rounded-md focus:ring-0 focus:bg-accent hover:bg-accent"
 								onClick={() => {
 									ws.clearChat(props.participant.id)
+									props.setOpen(false)
 								}}
 							>
 								<ClearChatIcon size={18} className="text-muted" />
@@ -149,10 +202,10 @@ export function ParticipantOptions(props: Props) {
 				</Popover.Portal>
 			</Popover.Root>
 
-			{open && (
+			{kickOpen && (
 				<KickParticipant
-					open={open}
-					setOpen={setOpen}
+					open={kickOpen}
+					setOpen={setKickOpen}
 					participant={participant}
 				/>
 			)}

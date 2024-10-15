@@ -93,8 +93,9 @@ func (s *socketServer) accept(conn *websocket.Conn, user *t.User) {
 }
 
 func (s *socketServer) close(conn *websocket.Conn, roomID int, user *t.User) {
+	pID := s.conns[conn].pID
 	delete(s.conns, conn)
-	s.leaveRoom(conn, user, roomID)
+	s.leaveRoom(conn, user, pID, roomID)
 }
 
 func (s *socketServer) isInRoom(conn *websocket.Conn, roomID int) bool {
@@ -105,7 +106,7 @@ func (s *socketServer) isInRoom(conn *websocket.Conn, roomID int) bool {
 	return false
 }
 
-func (s *socketServer) leaveRoom(conn *websocket.Conn, user *t.User, roomID int) {
+func (s *socketServer) leaveRoom(conn *websocket.Conn, user *t.User, pID string, roomID int) {
 	room, ok := s.rooms[roomID]
 	if !ok {
 		return
@@ -117,11 +118,7 @@ func (s *socketServer) leaveRoom(conn *websocket.Conn, user *t.User, roomID int)
 	// remove participants from users map
 	if _, ok := s.users[user.ID]; ok {
 		s.users[user.ID] = utils.Filter(s.users[user.ID], func(val string) bool {
-			c := s.conns[conn]
-			if c != nil {
-				return val != c.pID
-			}
-			return false
+			return val != pID
 		})
 
 		if len(s.users[user.ID]) == 0 {
@@ -702,9 +699,10 @@ func (s *socketServer) kickParticipantHandler(conn *websocket.Conn, b []byte) {
 	})
 
 	sIDs := s.users[data.ParticipantID]
-	for conn, val := range s.conns {
-		if utils.Includes(sIDs, val.pID) {
-			s.leaveRoom(conn, &s.participants[val.pID].User, data.RoomID)
+	for conn := range s.rooms[data.RoomID].conns {
+		pID := s.conns[conn].pID
+		if utils.Includes(sIDs, pID) {
+			s.leaveRoom(conn, &s.participants[pID].User, pID, data.RoomID)
 		}
 	}
 }
@@ -860,9 +858,13 @@ func (s *socketServer) addTrack(roomID int, conn *websocket.Conn, tr *webrtc.Tra
 		return nil, err
 	}
 
-	pID := s.conns[conn].pID
+	c, ok := s.conns[conn]
+	if !ok {
+		return nil, errors.New("socket conn is missing for track's peer")
+	}
+
 	s.rooms[roomID].tracks[tr.ID()] = &roomTrack{
-		pID:   pID,
+		pID:   c.pID,
 		track: track,
 	}
 
@@ -871,7 +873,7 @@ func (s *socketServer) addTrack(roomID int, conn *websocket.Conn, tr *webrtc.Tra
 		Data: map[string]any{
 			"roomID": roomID,
 			"streams": map[string]string{
-				pID: tr.StreamID(),
+				c.pID: tr.StreamID(),
 			},
 		},
 	})
@@ -969,6 +971,7 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		log.Printf("failed to accept socket connection: %v", err)
+		badRequest(w, err)
 		return
 	}
 
@@ -991,12 +994,17 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 		var event t.Event
 		err := wsjson.Read(context.Background(), conn, &event)
 		if err != nil {
-			return
+			if websocket.CloseStatus(err) != -1 {
+				return
+			}
+			log.Printf("error reading message from socket: %v", err)
+			continue
 		}
 
 		// only users who are authenticated can send event
 		if user == nil {
-			return
+			log.Printf("only authenticated users can send socket event")
+			continue
 		}
 
 		b, err := json.Marshal(event.Data)

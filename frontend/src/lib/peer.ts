@@ -49,6 +49,12 @@ class Peer {
 			monitorStream(stream)
 		}
 
+		pc.onconnectionstatechange = (e) => {
+			const connection = e.target as RTCPeerConnection
+			const isConnected = connection.connectionState === 'connected'
+			useAppStore.getState().setPeerConnected(isConnected)
+		}
+
 		pc.onicecandidate = (e) => {
 			if (!e.candidate) {
 				return

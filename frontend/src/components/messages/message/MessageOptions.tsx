@@ -53,14 +53,15 @@ export function MessageOptions(props: MessageOptionsProps) {
 	return (
 		<Dropdown.Root onOpenChange={setOpen}>
 			<Dropdown.Trigger asChild>
-				<button
-					className={cn('invisible', {
+				<span
+					role="button"
+					className={cn('invisible pl-1 inline-block relative top-1', {
 						visible: open,
 						'group-hover:visible': !props.message.isDeleted,
 					})}
 				>
 					<ChevronDownIcon size={18} className="text-muted" />
-				</button>
+				</span>
 			</Dropdown.Trigger>
 			<Dropdown.Portal>
 				<Dropdown.Content

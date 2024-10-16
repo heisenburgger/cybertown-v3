@@ -80,7 +80,7 @@ export function Profile(props: Props) {
 							</div>
 						)}
 					</div>
-					<p className="font-bold">{props.user.username}</p>
+					<p className="font-bold max-w-[280px]">{props.user.username}</p>
 					{profile && (
 						<>
 							<p className="max-w-[280px] my-3">{profile.bio}</p>

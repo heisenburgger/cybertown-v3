@@ -61,7 +61,7 @@ export const RelationList = React.forwardRef((props: Props, _ref) => {
 								}))
 							}}
 						/>
-						<p role="button" onClick={() => openDM(u)}>
+						<p className="ellipsis" role="button" onClick={() => openDM(u)}>
 							{u.username}
 						</p>
 					</div>

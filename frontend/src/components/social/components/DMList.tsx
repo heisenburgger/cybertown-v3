@@ -55,6 +55,7 @@ export const DMList = React.forwardRef((_props, _ref) => {
 								<div className="flex justify-between items-baseline gap-4">
 									<p
 										role="button"
+										className="ellipsis"
 										onClick={() => {
 											socialActions.setDM(dm.user)
 										}}
@@ -62,7 +63,7 @@ export const DMList = React.forwardRef((_props, _ref) => {
 										{dm.user.username}
 									</p>
 									{dm.lastMessage && (
-										<p className="text-muted text-sm">
+										<p className="text-muted text-sm flex-shrink-0">
 											{formatDate(dm.lastMessage.createdAt)}
 										</p>
 									)}

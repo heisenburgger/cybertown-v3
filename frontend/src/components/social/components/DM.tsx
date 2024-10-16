@@ -85,7 +85,7 @@ export function DM(props: Props) {
 						<span className="w-[10px] h-[10px] rounded-full rounded-full block bg-danger absolute right-[2px] top-0" />
 					)}
 				</div>
-				<p>{dmUser.username}</p>
+				<p className="ellipsis">{dmUser.username}</p>
 				{props.widget && (
 					<button className="ml-auto focus:ring-0" onClick={props.widget.close}>
 						<CloseIcon className="text-muted" size={20} />

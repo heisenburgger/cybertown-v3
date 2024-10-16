@@ -36,7 +36,11 @@ export function RoomPage() {
 	const cantJoinRoom =
 		user === null || error || isKicked || joinedAnotherRoom || leftRoom
 
-	if (isLoading || user === undefined || (!socketConnected && !cantJoinRoom)) {
+	if (
+		isLoading ||
+		user === undefined ||
+		(!socketConnected && !cantJoinRoom && isOnboarding)
+	) {
 		return (
 			<div className="h-screen flex items-center justify-center">
 				<LoadingIcon className="text-brand/20 fill-brand w-8 h-8" />

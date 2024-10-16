@@ -1,4 +1,4 @@
-import { APIError, getGoogleOAuthURL, removeAudioStreams } from '@/lib/utils'
+import { APIError, getGoogleOAuthURL } from '@/lib/utils'
 import { User } from '@/types'
 import { Link } from 'react-router-dom'
 import {
@@ -11,7 +11,6 @@ import {
 import { useEffect } from 'react'
 import { ws } from '@/lib/ws'
 import { format } from 'date-fns'
-import { peer } from '@/lib/peer'
 
 type Props = {
 	error: APIError | undefined
@@ -28,10 +27,6 @@ export function RoomError(props: Props) {
 
 	useEffect(() => {
 		ws.close()
-		if (peer.pc) {
-			peer.pc.close()
-		}
-		removeAudioStreams()
 	}, [])
 
 	if (!user) {

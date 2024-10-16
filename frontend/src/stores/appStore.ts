@@ -91,6 +91,7 @@ type Actions = {
 	setLeftRoom: (left: boolean) => void
 	setSocketConnected: (status: boolean) => void
 	setPeerConnected: (status: boolean) => void
+	clearRoomStreams: () => void
 
 	// scroll
 	setScrollPercent: (percent: number) => void
@@ -184,6 +185,11 @@ export const useAppStore = create<State & Actions>()(
 		setJoinedAnotherRoom: (isJoined) =>
 			set((state) => {
 				state.joinedAnotherRoom = isJoined
+			}),
+
+		clearRoomStreams: () =>
+			set((state) => {
+				state.roomStreams = {}
 			}),
 
 		setLeftRoom: (left) =>

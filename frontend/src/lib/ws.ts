@@ -1,7 +1,7 @@
 import { config } from '@/config'
 import { ClientEvent } from '@/types/client-event'
 import { ServerEvent } from '@/types/server-event'
-import { generateRandomID, queryClient } from './utils'
+import { generateRandomID, queryClient, removeAudioStreams } from './utils'
 import { useAppStore } from '@/stores/appStore'
 import { RoomRole } from '@/types'
 import { peer } from '@/lib/peer'
@@ -9,8 +9,16 @@ import { peer } from '@/lib/peer'
 class WS {
 	private socket: WebSocket | null = null
 	private static instance: WS
+	private isClosedByClient = false
+
 	roomID: number | null = null
 	joinRoomKey: string | null = null
+
+	// retries backoff: https://encore.dev/blog/retries
+	private maxReconnectDelay = 30
+	private baseReconnectDelay = 0.5
+	private maxReconnectAttempt = 100
+	private reconnectAttempts = 0
 
 	static getInstance(): WS {
 		if (!WS.instance) {
@@ -27,14 +35,32 @@ class WS {
 		this.socket = null
 		const socket = new WebSocket(config.wsURL)
 
-		socket.onclose = function (e: CloseEvent) {
+		socket.onclose = (e: CloseEvent) => {
 			console.error('socket connection closed', e.code)
 			useAppStore.getState().setSocketConnected(false)
+			this.cleanup()
+			if (!this.isClosedByClient) {
+				this.reconnect()
+			}
 		}
 
 		socket.onopen = () => {
-			console.log('socket connection established')
 			useAppStore.getState().setSocketConnected(true)
+			this.reconnectAttempts = 0
+
+			// if the socket established after reconnection
+			// rejoin room
+			if (this.roomID) {
+				const roomID = this.roomID
+				this.roomID = null
+				ws.joinRoom(roomID)
+				queryClient.invalidateQueries({
+					queryKey: [
+						['room', roomID],
+						['dms', roomID],
+					],
+				})
+			}
 		}
 
 		socket.onmessage = (e: MessageEvent) => {
@@ -134,6 +160,32 @@ class WS {
 			}
 		}
 		this.socket = socket
+	}
+
+	reconnect() {
+		if (this.reconnectAttempts > this.maxReconnectAttempt) {
+			console.error('reached maximum reconnect attempts')
+			return
+		}
+
+		const exponentialDelay = this.baseReconnectDelay * this.reconnectAttempts
+		const cappedDelay = Math.min(exponentialDelay, this.maxReconnectDelay)
+		const jitter = cappedDelay * 0.2 * (Math.random() * 2 - 1)
+		const delay = cappedDelay + jitter
+
+		setTimeout(() => {
+			this.reconnectAttempts++
+			this.establishSocketConn()
+		}, delay * 1000)
+	}
+
+	cleanup() {
+		if (peer.pc) {
+			peer.pc.close()
+			peer.pc = null
+		}
+		useAppStore.getState().clearRoomStreams()
+		removeAudioStreams()
 	}
 
 	joinRoom(roomID: number) {
@@ -320,6 +372,7 @@ class WS {
 	}
 
 	close() {
+		this.isClosedByClient = true
 		this.socket!.close()
 	}
 }

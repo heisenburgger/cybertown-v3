@@ -976,8 +976,20 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// last joined room
-	var roomID int
+	var (
+		// last joined room
+		roomID int
+
+		// to ban those script kiddies who thinks spamming the server
+		// with flood of requests is some kind of cool thing to do
+		failedReadAttempts int
+	)
+
+	ip := r.RemoteAddr
+	forwarded := r.Header.Get("X-Forwarded-For")
+	if forwarded != "" {
+		ip = forwarded
+	}
 
 	user, ok := r.Context().Value("user").(*t.User)
 	if !ok {
@@ -991,8 +1003,6 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	app.ss.accept(conn, user)
 
-	var failedReadAttemps int
-
 	for {
 		var event t.Event
 		err := wsjson.Read(context.Background(), conn, &event)
@@ -1001,16 +1011,10 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			ip := r.RemoteAddr
-			forwarded := r.Header.Get("X-Forwarded-For")
-			if forwarded != "" {
-				ip = forwarded
-			}
-
 			log.Printf("error reading message from socket: ip: %s err: %v", ip, err)
-			failedReadAttemps++
+			failedReadAttempts++
 
-			if failedReadAttemps >= 25 {
+			if failedReadAttempts >= 25 {
 				app.ss.ips = append(app.ss.ips, ip)
 				log.Printf("adding ip to whitelist: %s\n", ip)
 				return

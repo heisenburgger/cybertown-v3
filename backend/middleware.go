@@ -2,9 +2,7 @@ package main
 
 import (
 	"backend/types"
-	"backend/utils"
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -97,23 +95,5 @@ func (app *application) loggingMiddleware(next http.Handler) http.Handler {
 			recorder.status,
 			time.Since(start),
 		)
-	})
-}
-
-func (app *application) maliciousIP(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ip := r.RemoteAddr
-		forwarded := r.Header.Get("X-Forwarded-For")
-		if forwarded != "" {
-			ip = forwarded
-		}
-
-		if utils.Includes(app.ss.ips, ip) {
-			log.Printf("ips that got banned: %v\n", app.ss.ips)
-			forbiddenError(w, fmt.Errorf("banned ip: %s\n", ip))
-			return
-		}
-
-		next.ServeHTTP(w, r)
 	})
 }

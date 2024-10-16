@@ -50,7 +50,6 @@ type socketServer struct {
 	cfg          *t.Config
 	aiMsgRequest chan *t.AIMessageRequest
 	webrtcAPI    *webrtc.API
-	ips          []string
 }
 
 func newSocketServer(repo *db.Repo, svc *service.Service, webrtcAPI *webrtc.API, cfg *t.Config, bot *t.User, emojis map[string]struct{}) *socketServer {
@@ -979,10 +978,6 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 	var (
 		// last joined room
 		roomID int
-
-		// to ban those script kiddies who thinks spamming the server
-		// with flood of requests is some kind of cool thing to do
-		failedReadAttempts int
 	)
 
 	ip := r.RemoteAddr
@@ -1007,20 +1002,8 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 		var event t.Event
 		err := wsjson.Read(context.Background(), conn, &event)
 		if err != nil {
-			if websocket.CloseStatus(err) != -1 {
-				return
-			}
-
 			log.Printf("error reading message from socket: ip: %s err: %v", ip, err)
-			failedReadAttempts++
-
-			if failedReadAttempts >= 25 {
-				app.ss.ips = append(app.ss.ips, ip)
-				log.Printf("found malicious ip: %s\n", ip)
-				return
-			}
-
-			continue
+			return
 		}
 
 		// only users who are authenticated can send event

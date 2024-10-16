@@ -5,7 +5,7 @@ import "net/http"
 func (app *application) router() http.Handler {
 	router := http.NewServeMux()
 	ensureAuthed := createStack(app.authMiddleware, app.isAuthenticated)
-	core := createStack(app.loggingMiddleware, app.maliciousIP)
+	core := createStack(app.loggingMiddleware)
 
 	router.HandleFunc("GET /auth/google/callback", app.authCallbackHandler)
 	router.Handle("DELETE /auth/logout", ensureAuthed(http.HandlerFunc(app.logoutHandler)))

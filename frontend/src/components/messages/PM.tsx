@@ -18,11 +18,11 @@ export function PM(props: Props) {
 				src={props.pm.avatar}
 				referrerPolicy="no-referrer"
 			/>
-			<div className="flex-1 flex flex-col gap-1 text-sm">
-				<div className="flex items-center justify-between">
-					<div>
+			<div className="flex-1 flex flex-col gap-1 text-sm overflow-hidden">
+				<div className="flex items-center justify-between gap-2">
+					<div className="overflow-hidden">
 						<p className="text-danger mb-1">Private message to:</p>
-						<p>{props.pm.username}</p>
+						<p className="ellipsis">{props.pm.username}</p>
 					</div>
 					<button onClick={() => props.setPM(null)}>
 						<CloseIcon size={20} className="text-muted" />

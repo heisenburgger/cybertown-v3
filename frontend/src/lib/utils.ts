@@ -145,7 +145,7 @@ export function toHTML(md: string): string {
 		'br',
 	]
 
-	const allowedAttributes = ['class', 'href', 'rel', 'title', 'target']
+	const allowedAttributes = ['class', 'href', 'rel', 'title', 'target', 'style']
 
 	// akshually it returns Promise<string>
 	const html = marked.parse(md, { renderer, breaks: true }) as string

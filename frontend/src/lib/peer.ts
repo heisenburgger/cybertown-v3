@@ -18,6 +18,10 @@ class Peer {
 		if (this.pc) {
 			this.pc.close()
 			this.pc = null
+		}
+
+		if (this.track) {
+			this.track.stop()
 			this.track = null
 		}
 

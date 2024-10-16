@@ -7,7 +7,7 @@ import {
 	MicOff as MicOffIcon,
 	LogOut as LeaveRoom,
 } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 
 export function RoomControls() {
@@ -17,6 +17,8 @@ export function RoomControls() {
 	const setLeftRoom = useAppStore().setLeftRoom
 	const [open, setOpen] = useState(false)
 	const peerConnected = useAppStore().peerConnected
+	const socketConnected = useAppStore().socketConnected
+	const isConnected = peerConnected && socketConnected
 
 	async function handleMic() {
 		if (!hasStream.current) {
@@ -44,18 +46,25 @@ export function RoomControls() {
 		}
 	}
 
+	useEffect(() => {
+		if (!isConnected) {
+			setMic(false)
+			hasStream.current = false
+		}
+	}, [isConnected])
+
 	return (
 		<div className="flex justify-center">
 			<div className="flex justify-center items-center gap-1 py-[2px] min-w-[140px] bg-bg-2 border border-border rounded-b-md border-t-0">
 				<Tooltip
 					title={
-						!peerConnected
+						!isConnected
 							? 'Connecting...'
 							: `Turn ${mic ? 'off' : 'on'} microphone`
 					}
 				>
 					<button
-						disabled={!peerConnected}
+						disabled={!isConnected}
 						className="focus:ring-0 p-2 disabled:opacity-70 "
 						onClick={handleMic}
 					>
@@ -73,7 +82,7 @@ export function RoomControls() {
 				<Popover.Root open={open} onOpenChange={setOpen}>
 					<Popover.Trigger asChild>
 						<Tooltip title="Leave room">
-							<button className="focus:ring-0 p-2" onClick={() => {}}>
+							<button className="focus:ring-0 p-2">
 								<LeaveRoom className="text-muted" strokeWidth={1.5} size={20} />
 							</button>
 						</Tooltip>

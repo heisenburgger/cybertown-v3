@@ -55,7 +55,7 @@ export function MessageOptions(props: MessageOptionsProps) {
 			<Dropdown.Trigger asChild>
 				<span
 					role="button"
-					className={cn('invisible pl-1 inline-block relative top-1', {
+					className={cn('invisible', {
 						visible: open,
 						'group-hover:visible': !props.message.isDeleted,
 					})}

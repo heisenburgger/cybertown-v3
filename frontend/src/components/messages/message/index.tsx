@@ -51,7 +51,7 @@ export function Message(props: Props) {
 			/>
 			<div className="flex-1">
 				<div className="flex items-center justify-between text-muted text-sm mb-1 gap-4">
-					<div className="touch-none select-none">
+					<div className="flex items-start gap-1 touch-none select-none">
 						{props.dm === null &&
 						message.participant &&
 						message.from?.id === user?.id ? (
@@ -64,11 +64,9 @@ export function Message(props: Props) {
 								<p>{message.participant.username}</p>
 							</div>
 						) : (
-							<p>
-								{message.from.username}
-								<MessageOptions {...props} setEmojiOpen={setEmojiOpen} />
-							</p>
+							<p className="max-w-[240px]">{message.from.username}</p>
 						)}
+						<MessageOptions {...props} setEmojiOpen={setEmojiOpen} />
 					</div>
 					<div className="flex gap-2 items-center flex-shrink-0">
 						{message.isEdited && (

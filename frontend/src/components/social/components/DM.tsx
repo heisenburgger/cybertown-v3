@@ -75,7 +75,7 @@ export function DM(props: Props) {
 				>
 					<LeftIcon size={22} className="text-muted" />
 				</button>
-				<div className="relative">
+				<div className="relative flex-shrink-0">
 					<img
 						className="w-8 h-8 rounded-full mr-1"
 						src={dmUser.avatar}

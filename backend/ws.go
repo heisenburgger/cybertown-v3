@@ -1016,7 +1016,7 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 			if failedReadAttempts >= 25 {
 				app.ss.ips = append(app.ss.ips, ip)
-				log.Printf("adding ip to whitelist: %s\n", ip)
+				log.Printf("found malicious ip: %s\n", ip)
 				return
 			}
 

@@ -109,6 +109,7 @@ func (app *application) maliciousIP(next http.Handler) http.Handler {
 		}
 
 		if utils.Includes(app.ss.ips, ip) {
+			log.Printf("ips that got banned: %v\n", app.ss.ips)
 			forbiddenError(w, fmt.Errorf("banned ip: %s\n", ip))
 			return
 		}

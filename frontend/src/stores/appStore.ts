@@ -457,9 +457,15 @@ export const useAppStore = create<State & Actions>()(
 		setMute: (event) =>
 			set((state) => {
 				const { mute, participantID: pID } = event.data
-				if (state.roomStreams[pID]) {
-					state.roomStreams[pID].mute = mute
+				if (!state.roomStreams[pID]) {
+					state.roomStreams[pID] = {
+						mute: true,
+						volume: 100,
+						streamID: null,
+						speaking: false,
+					}
 				}
+				state.roomStreams[pID].mute = mute
 			}),
 
 		error: (event) =>

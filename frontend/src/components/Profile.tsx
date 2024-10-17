@@ -5,6 +5,7 @@ import { LoadingIcon } from '@/pages/home/components/LoadingIcon'
 import { useAppStore } from '@/stores/appStore'
 import { User } from '@/types'
 import * as Popover from '@radix-ui/react-popover'
+import { Tooltip } from '@/components/Tooltip'
 
 type Props = {
 	user: User
@@ -35,12 +36,24 @@ export function Profile(props: Props) {
 	return (
 		<Popover.Root open={props.open} onOpenChange={props.setOpen}>
 			<Popover.Trigger asChild>
-				<div className={classNames}>
-					<img
-						src={props.user.avatar}
-						referrerPolicy="no-referrer"
-						className="rounded-full"
-					/>
+				<div>
+					<Tooltip
+						delay={400}
+						title={
+							<>
+								<span>{props.user.username}</span>
+								<span className="text-muted">Click to know more</span>
+							</>
+						}
+					>
+						<div className={classNames}>
+							<img
+								src={props.user.avatar}
+								referrerPolicy="no-referrer"
+								className="rounded-full"
+							/>
+						</div>
+					</Tooltip>
 				</div>
 			</Popover.Trigger>
 			<Popover.Content

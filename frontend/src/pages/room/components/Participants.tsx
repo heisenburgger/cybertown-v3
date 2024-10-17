@@ -52,9 +52,13 @@ export function Participants(props: Props) {
 									{isCoHost && <p>Co-Host</p>}
 								</div>
 							)}
-							<p className="absolute text-white invisible group-hover:visible top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-								{p.username}
-							</p>
+							<div className="absolute text-white invisible group-hover:visible inset-0 flex items-center justify-center">
+								<div className="max-w-full max-h-full overflow-hidden px-1">
+									<p className="text-center break-words line-clamp-2">
+										{p.username}
+									</p>
+								</div>
+							</div>
 							<div className="absolute bottom-[2px] right-1">
 								{!stream.mute && stream.speaking && <Waveform />}
 								{stream.mute && (

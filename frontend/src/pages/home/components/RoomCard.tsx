@@ -5,6 +5,7 @@ import {
 	Info as InfoIcon,
 	SquarePen as PencilIcon,
 	Ban as BanIcon,
+	Users as UsersIcon,
 } from 'lucide-react'
 import { Profile } from '@/components/Profile'
 import { useState } from 'react'
@@ -43,54 +44,63 @@ export function RoomCard(props: Props) {
 
 	return (
 		<div className="p-4 border border-border rounded-md flex flex-col">
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between gap-2.5">
 				<Tooltip title={room.topic}>
-					<p className="text-lg font-semibold mb-1 flex-1 ellipsis pr-2">
+					<p className="text-lg font-semibold mb-1 ellipsis pr-2">
 						{room.topic}
 					</p>
 				</Tooltip>
-				<Popover.Root>
-					<Popover.Trigger className="rounded-lg">
-						<InfoIcon size={18} className="text-muted" />
-					</Popover.Trigger>
-					<Popover.Anchor />
-					<Popover.Portal>
-						<Popover.Content
-							side="bottom"
-							align="end"
-							sideOffset={12}
-							className="focus:outline-none rounded-lg p-6 shadow-md flex flex-col gap-2 border border-border min-w-[150px] bg-bg"
+				<div className="ml-auto flex gap-2.5 items-center">
+					{room.participants.length > 10 && (
+						<Tooltip
+							title={`Room occupied by ${room.participants.length} people`}
 						>
-							<div className="flex flex-col items-center justify-center gap-3 relative">
-								<p className="text-muted">Host</p>
-								<img
-									src={room.settings.host.avatar}
-									className="w-12 h-12 rounded-full"
-								/>
-								<div className="text-center">
-									<p className="font-semibold pb-1">
-										{room.settings.host.username}
-									</p>
-									<p className="text-muted text-sm">
-										{formatDate(room.createdAt)}
-									</p>
+							<UsersIcon size={18} className="text-muted" />
+						</Tooltip>
+					)}
+					<Popover.Root>
+						<Popover.Trigger className="rounded-lg">
+							<InfoIcon size={18} className="text-muted" />
+						</Popover.Trigger>
+						<Popover.Anchor />
+						<Popover.Portal>
+							<Popover.Content
+								side="bottom"
+								align="end"
+								sideOffset={12}
+								className="focus:outline-none rounded-lg p-6 shadow-md flex flex-col gap-2 border border-border min-w-[150px] bg-bg"
+							>
+								<div className="flex flex-col items-center justify-center gap-3 relative">
+									<p className="text-muted">Host</p>
+									<img
+										src={room.settings.host.avatar}
+										className="w-12 h-12 rounded-full"
+									/>
+									<div className="text-center">
+										<p className="font-semibold pb-1">
+											{room.settings.host.username}
+										</p>
+										<p className="text-muted text-sm">
+											{formatDate(room.createdAt)}
+										</p>
+									</div>
 								</div>
-							</div>
-							{user?.id === room.settings.host.id && (
-								<button
-									className="absolute top-4 right-4 p-[2px] rounded-lg"
-									onClick={() => {
-										setUpdateRoom(true, room)
-									}}
-								>
-									<span>
-										<PencilIcon className="text-muted" size={18} />
-									</span>
-								</button>
-							)}
-						</Popover.Content>
-					</Popover.Portal>
-				</Popover.Root>
+								{user?.id === room.settings.host.id && (
+									<button
+										className="absolute top-4 right-4 p-[2px] rounded-lg"
+										onClick={() => {
+											setUpdateRoom(true, room)
+										}}
+									>
+										<span>
+											<PencilIcon className="text-muted" size={18} />
+										</span>
+									</button>
+								)}
+							</Popover.Content>
+						</Popover.Portal>
+					</Popover.Root>
+				</div>
 			</div>
 
 			<p className="text-muted">{room.languages.join(' + ')}</p>

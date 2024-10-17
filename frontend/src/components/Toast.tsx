@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useAppStore } from '@/stores/appStore'
 import * as RToast from '@radix-ui/react-toast'
 import { X as CloseIcon, Info as InfoIcon, Ban as BanIcon } from 'lucide-react'
@@ -10,6 +11,21 @@ export function Toast() {
 		info: InfoIcon,
 	}
 	const Icon = toast.content?.type ? iconMap[toast.content.type] : null
+	const timerRef = useRef<ReturnType<typeof setTimeout>>()
+
+	useEffect(() => {
+		if (toast.open) {
+			if (timerRef.current) {
+				clearTimeout(timerRef.current)
+			}
+
+			timerRef.current = setTimeout(() => {
+				setToast(false)
+			}, 3000)
+
+			return () => clearTimeout(timerRef.current)
+		}
+	}, [toast.open, setToast])
 
 	return (
 		<RToast.Root

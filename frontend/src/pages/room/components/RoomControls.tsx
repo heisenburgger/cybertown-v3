@@ -92,7 +92,7 @@ export function RoomControls() {
 						sideOffset={12}
 						side="bottom"
 						align="start"
-						className="focus:outline-none rounded-md p-2 shadow-md bg-bg flex flex-col gap-2 border border-border"
+						className="focus:outline-none rounded-md p-2 shadow-md bg-bg flex flex-col gap-2 border border-border z-[2]"
 					>
 						<p className="max-w-[240px] mb-[1px]">
 							Are you sure you want to leave the room?

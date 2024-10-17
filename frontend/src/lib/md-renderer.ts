@@ -20,12 +20,13 @@ renderer.image = function ({ href, title, text }) {
 	return `<a href="${href}" ${titleAttr} ${target}>${text}</a>`
 }
 
-renderer.paragraph = function ({ text }) {
+const paraRenderer = renderer.paragraph
+renderer.paragraph = function (tokens) {
 	const onlyEmojis = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)+$/u.test(
-		text.trim()
+		tokens.text.trim()
 	)
 	if (onlyEmojis) {
-		return `<p style="font-size: 1.6em;">${text}</p>`
+		return `<p style="font-size: 1.6em;">${tokens.text}</p>`
 	}
-	return `<p>${text}</p>`
+	return paraRenderer.call(this, tokens)
 }

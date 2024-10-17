@@ -1,14 +1,16 @@
 import React from 'react'
 import * as RTooltip from '@radix-ui/react-tooltip'
+import { cn } from '@/lib/utils'
 
 type Props = {
 	children: React.ReactNode
 	title: string | React.ReactNode
 	delay?: number
+	classNames?: string
 }
 
 export const Tooltip = React.forwardRef((props: Props, _ref) => {
-	const { children, title, delay = 900, ...others } = props
+	const { children, title, delay = 900, classNames = '', ...others } = props
 	return (
 		<RTooltip.Provider>
 			<RTooltip.Root delayDuration={delay}>
@@ -17,7 +19,12 @@ export const Tooltip = React.forwardRef((props: Props, _ref) => {
 				</RTooltip.Trigger>
 				<RTooltip.Portal>
 					<RTooltip.Content sideOffset={8}>
-						<p className="rounded-lg p-1 px-3 bg-bg border border-border max-w-[300px] flex flex-col gap-[2px] text-center">
+						<p
+							className={cn(
+								'rounded-lg p-1 px-3 bg-bg border border-border max-w-[300px]',
+								classNames
+							)}
+						>
 							{title}
 						</p>
 						<RTooltip.Arrow className="fill-brand" />

@@ -17,7 +17,9 @@ export function RoomPage() {
 	const isKicked = useAppStore().isKicked
 	const joinedAnotherRoom = useAppStore().joinedAnotherRoom
 	const leftRoom = useAppStore().leftRoom
+	const roomFull = useAppStore().roomFull
 	const socketConnected = useAppStore().socketConnected
+	const sid = useAppStore().sid
 	const { isLoading, error } = useJoinRoom(
 		roomID!,
 		user !== null && user !== undefined
@@ -34,7 +36,12 @@ export function RoomPage() {
 	}, [])
 
 	const cantJoinRoom =
-		user === null || error || isKicked || joinedAnotherRoom || leftRoom
+		user === null ||
+		error ||
+		isKicked ||
+		joinedAnotherRoom ||
+		leftRoom ||
+		roomFull
 
 	if (
 		isLoading ||
@@ -56,11 +63,12 @@ export function RoomPage() {
 				isKicked={isKicked}
 				joinedAnotherRoom={joinedAnotherRoom}
 				leftRoom={leftRoom}
+				roomFull={roomFull}
 			/>
 		)
 	}
 
-	if (isOnboarding && user) {
+	if (isOnboarding && user && !sid) {
 		return <Onboarding user={user} setIsOnboarding={setIsOnBoarding} />
 	}
 

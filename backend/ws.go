@@ -52,6 +52,10 @@ type socketServer struct {
 	webrtcAPI    *webrtc.API
 }
 
+var (
+	roomFullErr = errors.New("max participants limit reached")
+)
+
 func newSocketServer(repo *db.Repo, svc *service.Service, webrtcAPI *webrtc.API, cfg *t.Config, bot *t.User, emojis map[string]struct{}) *socketServer {
 	return &socketServer{
 		conns:        make(map[*websocket.Conn]*socketConn),
@@ -208,7 +212,7 @@ func (s *socketServer) joinRoomHandler(conn *websocket.Conn, b []byte) (int, err
 	}
 
 	if len(s.rooms[data.RoomID].conns) >= r.MaxParticipants {
-		return 0, errors.New("max participants limit reached")
+		return data.RoomID, roomFullErr
 	}
 
 	p, err := s.NewPeer(data.RoomID, conn)
@@ -1023,6 +1027,15 @@ func (app *application) wsHandler(w http.ResponseWriter, r *http.Request) {
 			roomID, err = app.ss.joinRoomHandler(conn, b)
 			if err != nil {
 				log.Printf("failed to join room: %v", err)
+				if errors.Is(err, roomFullErr) {
+					utils.WriteEvent(conn, &t.Event{
+						Name: "ERROR_BROADCAST",
+						Data: map[string]any{
+							"roomID": roomID,
+							"title":  "Room Full",
+						},
+					})
+				}
 			}
 		case "NEW_MESSAGE":
 			app.ss.newMessageHandler(conn, b)

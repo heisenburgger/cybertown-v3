@@ -44,7 +44,7 @@ export function RoomCard(props: Props) {
 
 	return (
 		<div className="p-4 border border-border rounded-md flex flex-col">
-			<div className="flex items-center justify-between gap-2.5">
+			<div className="flex items-center justify-between">
 				<Tooltip title={room.topic}>
 					<p className="text-lg font-semibold mb-1 ellipsis pr-2">
 						{room.topic}

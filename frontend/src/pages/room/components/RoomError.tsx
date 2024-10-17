@@ -20,6 +20,7 @@ type Props = {
 	} | null
 	joinedAnotherRoom: boolean
 	leftRoom: boolean
+	roomFull: boolean
 }
 
 export function RoomError(props: Props) {
@@ -33,8 +34,8 @@ export function RoomError(props: Props) {
 		return <Error status={401} />
 	}
 
-	if (error?.status === 400) {
-		return <Error status={error.status} />
+	if (error?.status === 400 || props.roomFull) {
+		return <Error status={error?.status ?? 400} />
 	}
 
 	if (error?.status === 404) {

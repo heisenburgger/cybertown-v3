@@ -26,6 +26,7 @@ type State = {
 	} | null
 	joinedAnotherRoom: boolean
 	leftRoom: boolean
+	roomFull: boolean
 
 	dm: Record<string, Message[]>
 
@@ -123,6 +124,7 @@ export const useAppStore = create<State & Actions>()(
 		isKicked: null,
 		joinedAnotherRoom: false,
 		leftRoom: false,
+		roomFull: false,
 
 		user: undefined,
 
@@ -470,6 +472,11 @@ export const useAppStore = create<State & Actions>()(
 
 		error: (event) =>
 			set((state) => {
+				if (event.data.title === 'Room Full') {
+					state.roomFull = true
+					return
+				}
+
 				state.toast = {
 					open: true,
 					content: {

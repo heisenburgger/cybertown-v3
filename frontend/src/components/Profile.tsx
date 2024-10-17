@@ -38,6 +38,7 @@ export function Profile(props: Props) {
 			<Popover.Trigger asChild>
 				<div>
 					<Tooltip
+						classNames=" flex flex-col gap-[2px] text-center"
 						delay={400}
 						title={
 							<>
